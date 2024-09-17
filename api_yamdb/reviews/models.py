@@ -10,16 +10,47 @@ MAX_RATING = 10
 WRONG_RATING = (f'Оценка должна лежать в диапазоне от {MIN_RATING} '
                 f'до {MAX_RATING}!')
 
+USER = 'user'
+MODERATOR = 'moderator'
+ADMIN = 'admin'
+
+ROLES = [
+    (USER, 'пользователь'),
+    (MODERATOR, 'модератор'),
+    (ADMIN, 'администратор'),
+]
+
 
 class User(AbstractUser):
     username = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,
-        unique=True)
+        unique=True,
+    )
     email = models.EmailField(
         verbose_name='Адрес электронной почты',
         max_length=250,
-        unique=True
+        unique=True,
+    )
+    role = models.CharField(
+        verbose_name='Роль',
+        max_length=20,
+        choices=ROLES,
+        default=USER,
+    )
+    bio = models.TextField(
+        'О себе',
+        blank=True,
+    )
+    first_name = models.CharField(
+        'Имя',
+        max_length=150,
+        blank=True,
+    )
+    last_name = models.CharField(
+        'Фамилия',
+        max_length=150,
+        blank=True,
     )
 
     class Meta:
@@ -82,3 +113,6 @@ class Review(models.Model):
             f'{self.text[:DESCRIPTION_LENGTH_LIMIT]} | '
             f'{self.author[:DESCRIPTION_LENGTH_LIMIT]}'
         )
+
+    def __str__(self):
+        return self.username
