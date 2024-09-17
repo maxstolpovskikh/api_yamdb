@@ -32,7 +32,7 @@ class Title(models.Model):
 
 
 class Review(models.Model):
-    '''Модель отзывов.'''
+    """Модель отзывов."""
 
     title = models.ForeignKey(
         Title,
