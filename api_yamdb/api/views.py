@@ -3,9 +3,16 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Avg
+from rest_framework import viewsets
 
-from reviews.models import User
+from reviews.models import Category, Genre, Title, User
+from .mixins import ListCreateDestroyViewSet
+from .filters import TitleFilter
 from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
+from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
+                          GetTitleSerializer)
 
 
 class SignupView(APIView):
@@ -48,3 +55,25 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated,)
+
+
+class CategoryViewSet(ListCreateDestroyViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class GenreViewSet(ListCreateDestroyViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+    serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return GetTitleSerializer
+        return TitleSerializer

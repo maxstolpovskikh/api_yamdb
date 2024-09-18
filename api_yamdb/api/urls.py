@@ -1,10 +1,20 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+from rest_framework import routers
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 from .views import SignupView, JWTokenView, UserViewSet
+from .views import CategoryViewSet, GenreViewSet, TitleViewSet
+
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='User')
+router.register('categories', CategoryViewSet, basename='categories')
+router.register('genres', GenreViewSet, basename='genres')
+router.register('titles', TitleViewSet, basename='titles')
 
 auth_patterns = [
     path('signup/', SignupView.as_view(), name='signup'),

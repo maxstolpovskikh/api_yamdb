@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -6,6 +8,8 @@ from .validators import regex_validator, validate_not_me
 
 
 DESCRIPTION_LENGTH_LIMIT = 20
+MAX_CHAR_LENGTH = 250
+MAX_SLUG_LENGTH = 50
 
 MIN_RATING = 1
 MAX_RATING = 10
@@ -66,8 +70,110 @@ class User(AbstractUser):
         return self.username
 
 
+class Category(models.Model):
+    name = models.CharField(
+        max_length=MAX_CHAR_LENGTH,
+        verbose_name='Hазвание категории',
+    )
+    slug = models.SlugField(
+        max_length=MAX_SLUG_LENGTH,
+        verbose_name='Идентификатор',
+        unique=True,
+    )
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name[:DESCRIPTION_LENGTH_LIMIT]
+
+
+class Genre(models.Model):
+    name = models.CharField(
+        max_length=MAX_CHAR_LENGTH,
+        verbose_name='Hазвание жанра',
+    )
+    slug = models.SlugField(
+        max_length=MAX_SLUG_LENGTH,
+        verbose_name='Идентификатор',
+        unique=True,
+    )
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name[:DESCRIPTION_LENGTH_LIMIT]
+
+
 class Title(models.Model):
-    pass
+    name = models.CharField(
+        max_length=MAX_CHAR_LENGTH,
+        verbose_name='Hазвание произведения',
+    )
+    year = models.IntegerField(
+        verbose_name='год выхода',
+        validators=[
+            MinValueValidator(
+                0,
+                message='Год не может быть меньше нуля'
+            ),
+            MaxValueValidator(
+                int(datetime.now().year),
+                message='Год не может быть из будущего'
+            )
+        ],
+    )
+    description = models.TextField(
+        verbose_name='описание',
+        blank=True
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        through='GenreTitle',
+        related_name='titles',
+        verbose_name='жанр'
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        verbose_name='категория',
+        null=True
+    )
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name[:DESCRIPTION_LENGTH_LIMIT]
+
+
+class GenreTitle(models.Model):
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        verbose_name='Жанр'
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Произведение'
+    )
+
+    class Meta:
+        verbose_name = 'Жанр - произведение'
+        verbose_name_plural = 'Жанры - произведения'
+        ordering = ('id',)
+
+    def __str__(self):
+        return f'{self.title} соответствует жанру: {self.genre}'
 
 
 class Review(models.Model):
@@ -99,7 +205,7 @@ class Review(models.Model):
     )
     pub_date = models.DateTimeField(
         'Дата добавления',
-        auto_now_add=True
+        auto_now_add=True,
     )
 
     class Meta:
@@ -120,4 +226,37 @@ class Review(models.Model):
             f'{self.score} | '
             f'{self.text[:DESCRIPTION_LENGTH_LIMIT]} | '
             f'{self.author[:DESCRIPTION_LENGTH_LIMIT]}'
+        )
+
+
+class Comment(models.Model):
+    """Модель комментариев."""
+
+    text = models.TextField('Текст комментария')
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        verbose_name='Отзыв',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
+    )
+    pub_date = models.DateTimeField(
+        'Дата добавления',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'Комментарии'
+        default_related_name = 'comments'
+        ordering = ('pub_date',)
+
+    def __str__(self):
+        return (
+            f'{self.text[:DESCRIPTION_LENGTH_LIMIT]} | '
+            f'{self.review} | '
+            f'{self.author} | '
         )
