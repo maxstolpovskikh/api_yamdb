@@ -18,12 +18,11 @@ class SignUpSerializer(serializers.ModelSerializer):
         return str(random.randrange(100000, 999999))
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        return User.objects.create_user(
             email=validated_data['email'],
             username=validated_data['username'],
             confirmation_code=self.generate_confirmation_code(),
         )
-        return user
 
 
 class TokenSerializer(serializers.ModelSerializer):
