@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from .validators import regex_validator, validate_not_me
+
 
 DESCRIPTION_LENGTH_LIMIT = 20
 
@@ -22,14 +24,16 @@ ROLES = [
 
 
 class User(AbstractUser):
+    """Кастомный класс пользователей."""
     username = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,
         unique=True,
+        validators=[regex_validator, validate_not_me],
     )
     email = models.EmailField(
         verbose_name='Адрес электронной почты',
-        max_length=250,
+        max_length=254,
         unique=True,
     )
     role = models.CharField(
@@ -52,10 +56,14 @@ class User(AbstractUser):
         max_length=150,
         blank=True,
     )
+    confirmation_code = models.CharField(max_length=100, blank=True)
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.username
 
 
 class Title(models.Model):
@@ -113,6 +121,3 @@ class Review(models.Model):
             f'{self.text[:DESCRIPTION_LENGTH_LIMIT]} | '
             f'{self.author[:DESCRIPTION_LENGTH_LIMIT]}'
         )
-
-    def __str__(self):
-        return self.username
