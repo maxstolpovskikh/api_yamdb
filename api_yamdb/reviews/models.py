@@ -114,6 +114,7 @@ class Title(models.Model):
     name = models.CharField(
         max_length=MAX_CHAR_LENGTH,
         verbose_name='Hазвание произведения',
+        null=True,  # убрать
     )
     year = models.IntegerField(
         verbose_name='год выхода',
@@ -127,6 +128,7 @@ class Title(models.Model):
                 message='Год не может быть из будущего'
             )
         ],
+        null=True,  # убрать
     )
     description = models.TextField(
         verbose_name='описание',
