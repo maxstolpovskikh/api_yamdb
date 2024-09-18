@@ -57,6 +57,9 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
+    def __str__(self):
+        return self.username
+
 
 class Title(models.Model):
     pass
@@ -91,7 +94,7 @@ class Review(models.Model):
     )
     pub_date = models.DateTimeField(
         'Дата добавления',
-        auto_now_add=True
+        auto_now_add=True,
     )
 
     class Meta:
@@ -114,5 +117,36 @@ class Review(models.Model):
             f'{self.author[:DESCRIPTION_LENGTH_LIMIT]}'
         )
 
+
+class Comment(models.Model):
+    """Модель комментариев."""
+
+    text = models.TextField('Текст комментария')
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        verbose_name='Отзыв',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
+    )
+    pub_date = models.DateTimeField(
+        'Дата добавления',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'Комментарии'
+        default_related_name = 'comments'
+        ordering = ('pub_date',)
+
     def __str__(self):
-        return self.username
+        return (
+            f'{self.text[:DESCRIPTION_LENGTH_LIMIT]} | '
+            f'{self.review} | '
+            f'{self.author} | '
+        )
+
