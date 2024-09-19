@@ -11,9 +11,11 @@ from rest_framework.views import APIView
 from reviews.models import Category, Genre, Review, Title, User
 from .mixins import ListCreateDestroyViewSet
 from .filters import TitleFilter
-from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
-from .serializers import (CategorySerializer, CommentSerializer, GenreSerializer,
-                          ReviewSerialiser, TitleSerializer, GetTitleSerializer )
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, GetTitleSerializer,
+                          ReviewSerialiser, SignUpSerializer,
+                          TitleSerializer, TokenSerializer,
+                          UserSerializer)
 
 
 class SignupView(APIView):

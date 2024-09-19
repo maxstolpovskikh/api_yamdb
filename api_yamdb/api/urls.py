@@ -7,7 +7,8 @@ from rest_framework_simplejwt.views import (
 )
 
 from .views import SignupView, JWTokenView, UserViewSet
-from .views import CategoryViewSet, CommentViewSet, GenreViewSet, ReviewViewSet, TitleViewSet
+from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
+                    ReviewViewSet, TitleViewSet)
 
 
 router = DefaultRouter()
