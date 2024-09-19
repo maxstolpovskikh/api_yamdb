@@ -1,8 +1,13 @@
 import random
 
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
-from reviews.models import Category, Genre, Title, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
+
+
+REVIEW_COUNT_ERROR = 'Можно оставить только один отзыв на произведение!'
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -50,7 +55,7 @@ class UserSerializer(serializers.ModelSerializer):
             'role',
         )
 
-        
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -102,3 +107,41 @@ class TitleSerializer(serializers.ModelSerializer):
     def to_representation(self, title):
         serializer = GetTitleSerializer(title)
         return serializer.data
+ 
+
+class ReviewSerialiser(serializers.ModelSerializer):
+    """Сериализатор для модели отзывов."""
+
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = Review
+        exclude = ('title',)
+
+    def validate(self, data):
+        request = self.context['request']
+        if request.method == 'POST':
+            title_id = self.context['view'].kwargs['tile_id']
+            if Review.objects.filter(
+                title=get_object_or_404(Title, pk=title_id),
+                author=request.user
+            ).exists():
+                raise ValidationError(REVIEW_COUNT_ERROR)
+        return data
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели комментариев."""
+
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+    )
+
+    class Meta:
+        model = Comment
+        exclude = ('review',)
