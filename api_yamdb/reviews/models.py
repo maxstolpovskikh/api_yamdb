@@ -6,7 +6,6 @@ from django.db import models
 
 from .validators import regex_validator, validate_not_me
 
-
 DESCRIPTION_LENGTH_LIMIT = 20
 MAX_CHAR_LENGTH = 250
 MAX_SLUG_LENGTH = 50

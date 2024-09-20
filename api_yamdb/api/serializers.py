@@ -1,5 +1,4 @@
 import random
-import re
 
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -102,7 +101,7 @@ class TitleSerializer(serializers.ModelSerializer):
     def to_representation(self, title):
         serializer = GetTitleSerializer(title)
         return serializer.data
- 
+
 
 class ReviewSerialiser(serializers.ModelSerializer):
     """Сериализатор для модели отзывов."""

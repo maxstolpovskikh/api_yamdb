@@ -1,5 +1,3 @@
-import random
-
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -16,9 +14,9 @@ from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import IsAuthenticatedAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, GetTitleSerializer,
+                          GenreSerializer, GetTitleSerializer, MeSerializer,
                           ReviewSerialiser, SignUpSerializer, TitleSerializer,
-                          TokenSerializer, UserSerializer, MeSerializer)
+                          TokenSerializer, UserSerializer)
 
 
 class SignupView(APIView):
