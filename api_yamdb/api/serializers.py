@@ -1,4 +1,5 @@
 import random
+import re
 
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -6,28 +7,19 @@ from rest_framework.exceptions import ValidationError
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
-
 REVIEW_COUNT_ERROR = 'Можно оставить только один отзыв на произведение!'
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = (
             'email',
-            'username',
+            'username'
         )
 
     def generate_confirmation_code(self):
         return str(random.randrange(100000, 999999))
-
-    def create(self, validated_data):
-        return User.objects.create_user(
-            email=validated_data['email'],
-            username=validated_data['username'],
-            confirmation_code=self.generate_confirmation_code(),
-        )
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -43,7 +35,6 @@ class TokenSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = (
@@ -52,8 +43,12 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'bio',
-            'role',
+            'role'
         )
+
+
+class MeSerializer(UserSerializer):
+    role = serializers.CharField(read_only=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):

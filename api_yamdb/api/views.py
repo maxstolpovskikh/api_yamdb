@@ -1,21 +1,24 @@
-from django_filters.rest_framework import DjangoFilterBackend
+import random
+
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status, viewsets
-from rest_framework import viewsets
-from rest_framework_simplejwt.tokens import RefreshToken
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Review, Title, User
-from .mixins import ListCreateDestroyViewSet
+
 from .filters import TitleFilter
+from .mixins import ListCreateDestroyViewSet
+from .permissions import IsAuthenticatedAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetTitleSerializer,
-                          ReviewSerialiser, SignUpSerializer,
-                          TitleSerializer, TokenSerializer,
-                          UserSerializer)
+                          ReviewSerialiser, SignUpSerializer, TitleSerializer,
+                          TokenSerializer, UserSerializer, MeSerializer)
 
 
 class SignupView(APIView):
@@ -23,8 +26,20 @@ class SignupView(APIView):
 
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        if not serializer.is_valid():
+            email = serializer.initial_data.get('email')
+            username = serializer.initial_data.get('username')
+            user = User.objects.filter(email=email).first()
+            if user and user.username == username:
+                user.confirmation_code = serializer.generate_confirmation_code()
+                user.save()
+            else:
+                return Response(
+                    serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+        else:
+            user = serializer.save()
+
         send_mail(
             'Регистрация в Yamdb',
             f'Код подтверждения {user.confirmation_code}',
@@ -32,7 +47,11 @@ class SignupView(APIView):
             [user.email],
             fail_silently=False,
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(
+            {'email': user.email, 'username': user.username},
+            status=status.HTTP_200_OK
+        )
 
 
 class JWTokenView(APIView):
@@ -57,7 +76,33 @@ class JWTokenView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsAuthenticatedAdmin,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('=username',)
+    filterset_fields = ('username')
+    search_fields = ('username', )
+    lookup_field = 'username'
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
+
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        permission_classes=(IsAuthenticated, )
+    )
+    def me(self, request):
+        user = get_object_or_404(User, username=self.request.user)
+        if request.method == 'GET':
+            serializer = MeSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == 'PATCH':
+            serializer = MeSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):

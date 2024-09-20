@@ -62,9 +62,12 @@ class User(AbstractUser):
     )
     confirmation_code = models.CharField(max_length=100, blank=True)
 
+    is_admin = models.BooleanField(default=False)
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ('id',)
 
     def __str__(self):
         return self.username
