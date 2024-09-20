@@ -12,11 +12,14 @@ from reviews.models import Category, Genre, Review, Title, User
 
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
-from .permissions import IsAuthenticatedAdmin
+from .permissions import IsAdmin, IsAdminOrAuthor
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetTitleSerializer, MeSerializer,
                           ReviewSerialiser, SignUpSerializer, TitleSerializer,
                           TokenSerializer, UserSerializer)
+
+
+ALLOWED_METHODS = ['get', 'post', 'patch', 'delete']
 
 
 class SignupView(APIView):
@@ -74,22 +77,18 @@ class JWTokenView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticatedAdmin,)
+    permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=username',)
     filterset_fields = ('username')
     search_fields = ('username', )
     lookup_field = 'username'
-
-    def update(self, request, *args, **kwargs):
-        if request.method == 'PUT':
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().update(request, *args, **kwargs)
+    http_method_names = ALLOWED_METHODS
 
     @action(
         methods=['get', 'patch'],
         detail=False,
-        permission_classes=(IsAuthenticated, )
+        permission_classes=(IsAuthenticated,)
     )
     def me(self, request):
         user = get_object_or_404(User, username=self.request.user)
@@ -118,6 +117,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+    http_method_names = ALLOWED_METHODS
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -127,6 +127,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerialiser
+    http_method_names = ALLOWED_METHODS
 
     def get_queryset(self):
         return self.get_title().reviews.all()
@@ -140,6 +141,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    http_method_names = ALLOWED_METHODS
 
     def get_queryset(self):
         return self.get_review().comments.all()
