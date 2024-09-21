@@ -34,7 +34,7 @@ class SignupView(APIView):
             username = serializer.initial_data.get('username')
             user = User.objects.filter(email=email).first()
             if user and user.username == username:
-                user.confirmation_code = serializer.generate_confirmation_code()
+                user.confirmation_code = serializer.gen_code()
                 user.save()
             else:
                 return Response(
@@ -144,7 +144,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """ViewSet для отзывов."""
- 
+
     serializer_class = ReviewSerialiser
     http_method_names = ALLOWED_METHODS
     permission_classes = [
