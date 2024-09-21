@@ -19,7 +19,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             'username'
         )
 
-    def generate_confirmation_code(self):
+    def gen_code(self):
         return str(random.randrange(100000, 999999))
 
 

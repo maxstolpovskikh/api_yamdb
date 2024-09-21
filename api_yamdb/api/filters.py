@@ -5,7 +5,7 @@ from reviews.models import Title
 
 class TitleFilter(rest_framework.FilterSet):
     """Фильтр для произведений по имени, категории, жанру и году."""
-    
+
     name = rest_framework.CharFilter(
         field_name='name',
         lookup_expr='icontains'
