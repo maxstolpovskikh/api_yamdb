@@ -11,17 +11,17 @@ class IsAdmin(permissions.BasePermission):
 class ReadOnly(permissions.BasePermission):
     """Разрешение для предоставления доступа только к безопасным методам."""
 
-    def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS
-
+        return request.user.is_authenticated and (
+            request.user.role == 'admin' or request.user.is_superuser
+        )
 
 class IsAuthorOrAdminOrModerOrReadOnly(permissions.BasePermission):
     """Разрешение для автора, админа, модератора (изменение) или для чтения."""
+
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return (
-            obj.author == request.user
-            or request.user.is_admin
-            or request.user.is_moderator
-        )
+
+        return (request.user.is_authenticated and (
+            request.user.role == 'admin' or request.user.is_superuser
+        )) or obj.author == request.user
