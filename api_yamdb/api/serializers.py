@@ -10,6 +10,8 @@ REVIEW_COUNT_ERROR = 'Можно оставить только один отзы
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    """Сериализатор для регистрации  с генерацией кода подтверждения."""
+
     class Meta:
         model = User
         fields = (
@@ -22,6 +24,8 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
+    """Сериализатор для обработки токенов аутентификации."""
+
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
@@ -34,6 +38,8 @@ class TokenSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор модели пользователя."""
+
     class Meta:
         model = User
         fields = (
@@ -47,16 +53,21 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class MeSerializer(UserSerializer):
+    """Сериализатор для текущего пользователя."""
+
     role = serializers.CharField(read_only=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор для модели категории с полями имени и slug'а."""
+
     class Meta:
         model = Category
         fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели жанра с полями имени и slug'а."""
     class Meta:
         model = Genre
         fields = ('name', 'slug')
@@ -84,6 +95,7 @@ class GetTitleSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели произведения."""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),

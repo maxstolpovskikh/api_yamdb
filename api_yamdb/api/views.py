@@ -23,6 +23,8 @@ ALLOWED_METHODS = ['get', 'post', 'patch', 'delete']
 
 
 class SignupView(APIView):
+    """Представление для регистрации и отправки кода подтверждения."""
+
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -53,6 +55,8 @@ class SignupView(APIView):
 
 
 class JWTokenView(APIView):
+    """Представление для получения JWT токена по коду подтверждения."""
+
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -72,6 +76,8 @@ class JWTokenView(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """ViewSet для управления пользователями с дополнительным методом 'me'."""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdmin]
@@ -99,18 +105,24 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
+    """ViewSet для категорий."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAdmin | ReadOnly]
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
+    """ViewSet для жанров."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [IsAdmin | ReadOnly]
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """ViewSet для произведений."""
+
     queryset = (
         Title.objects
         .annotate(
@@ -131,6 +143,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """ViewSet для отзывов."""
+ 
     serializer_class = ReviewSerialiser
     http_method_names = ALLOWED_METHODS
     permission_classes = [
@@ -149,6 +163,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """ViewSet для комментариев."""
+
     serializer_class = CommentSerializer
     http_method_names = ALLOWED_METHODS
     permission_classes = [
