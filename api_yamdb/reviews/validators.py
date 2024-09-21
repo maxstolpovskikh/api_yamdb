@@ -7,6 +7,8 @@ regex_validator = RegexValidator(regex=r'^[\w.@+-]+\Z')
 
 
 def validate_not_me(value):
+    """Валидатор для проверки, что значение не равно 'me'."""
+
     if value.lower() == 'me':
         raise ValidationError(
             _('Неможет быть me'),
