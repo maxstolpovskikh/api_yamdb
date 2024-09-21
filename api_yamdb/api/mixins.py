@@ -8,6 +8,7 @@ class ListCreateDestroyViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    """ViewSet с методами list, create, destroy и поиском по имени."""
 
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)

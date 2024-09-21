@@ -83,6 +83,8 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
+    """Модель категории."""
+
     name = models.CharField(
         max_length=MAX_CHAR_LENGTH,
         verbose_name='Hазвание категории',
@@ -103,6 +105,8 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель жанра."""
+
     name = models.CharField(
         max_length=MAX_CHAR_LENGTH,
         verbose_name='Hазвание жанра',
@@ -123,6 +127,8 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель произведения."""
+
     name = models.CharField(
         max_length=MAX_CHAR_LENGTH,
         verbose_name='Hазвание произведения',
@@ -168,6 +174,8 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    """Промежуточная модель для связи между жанрами и произведениями."""
+
     genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
