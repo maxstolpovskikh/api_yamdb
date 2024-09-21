@@ -1,6 +1,6 @@
 import pandas as pd
-
-from reviews.models import Category, Comment, GenreTitle, Genre, Review, Title, User
+from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
+                            Title, User)
 
 for index, row in pd.read_csv('static/data/category.csv').iterrows():
     category = Category(

@@ -18,7 +18,11 @@ class TitleFilter(rest_framework.FilterSet):
         field_name='genre__slug',
         lookup_expr='icontains'
     )
+    year = rest_framework.CharFilter(
+        field_name='year',
+        lookup_expr='icontains'
+    )
 
     class Meta:
         model = Title
-        fields = ['name', 'category', 'genre']
+        fields = ['name', 'category', 'genre', 'year']
