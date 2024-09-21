@@ -4,10 +4,12 @@ from rest_framework.routers import DefaultRouter
 from .views import (CategoryViewSet, CommentViewSet, GenreViewSet, JWTokenView,
                     ReviewViewSet, SignupView, TitleViewSet, UserViewSet)
 
+
 router = DefaultRouter()
 router.register('categories', CategoryViewSet, basename='categories')
 router.register('genres', GenreViewSet, basename='genres')
 router.register('titles', TitleViewSet, basename='titles')
+router.register(r'users', UserViewSet)
 router.register(
     r'titles/(?P<title_id>\d+)/reviews',
     ReviewViewSet,
@@ -18,7 +20,6 @@ router.register(
     CommentViewSet,
     basename='comments'
 )
-router.register(r'users', UserViewSet)
 
 auth_patterns = [
     path('signup/', SignupView.as_view(), name='signup'),

@@ -23,7 +23,9 @@ ALLOWED_METHODS = ['get', 'post', 'patch', 'delete']
 
 
 class SignupView(APIView):
-    permission_classes = (permissions.AllowAny,)
+    """Представление для регистрации и отправки кода подтверждения."""
+
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
@@ -56,7 +58,9 @@ class SignupView(APIView):
 
 
 class JWTokenView(APIView):
-    permission_classes = (permissions.AllowAny,)
+    """Представление для получения JWT токена по коду подтверждения."""
+
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
@@ -75,6 +79,8 @@ class JWTokenView(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """ViewSet для управления пользователями с дополнительным методом 'me'."""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
@@ -103,17 +109,29 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
+    """ViewSet для категорий."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
+    """ViewSet для жанров."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+    """ViewSet для произведений."""
+
+    queryset = (
+        Title.objects
+        .annotate(
+            rating=Avg('reviews__score')
+        )
+        .order_by('reviews__score')
+    )
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
@@ -126,6 +144,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """ViewSet для отзывов."""
+ 
     serializer_class = ReviewSerialiser
     http_method_names = ALLOWED_METHODS
 
@@ -140,6 +160,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """ViewSet для комментариев."""
+
     serializer_class = CommentSerializer
     http_method_names = ALLOWED_METHODS
 
