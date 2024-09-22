@@ -109,3 +109,6 @@ SIMPLE_JWT = {
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DOMAIN_NAME = 'example.com'  # Замените на ваш домен
+DEFAULT_FROM_EMAIL = f'noreply@{DOMAIN_NAME}'

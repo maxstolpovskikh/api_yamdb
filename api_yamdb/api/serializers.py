@@ -19,9 +19,6 @@ class SignUpSerializer(serializers.ModelSerializer):
             'username'
         )
 
-    def gen_code(self):
-        return str(random.randrange(100000, 999999))
-
 
 class TokenSerializer(serializers.ModelSerializer):
     """Сериализатор для обработки токенов аутентификации."""
