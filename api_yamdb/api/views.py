@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator as token_gen
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -9,8 +11,8 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Review, Title, User
 
+from reviews.models import Category, Genre, Review, Title, User
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import IsAdmin, IsAuthorOrAdminOrModerOrReadOnly, ReadOnly
@@ -28,30 +30,32 @@ class SignupView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
-        if not serializer.is_valid():
-            email = serializer.initial_data.get('email')
-            username = serializer.initial_data.get('username')
-            user = User.objects.filter(email=email).first()
-            if user and user.username == username:
-                user.confirmation_code = serializer.gen_code()
-                user.save()
-            else:
-                return Response(
-                    serializer.errors,
-                    status=status.HTTP_400_BAD_REQUEST)
+        email = request.data.get('email')
+        username = request.data.get('username')
+
+        user = User.objects.filter(email=email).first()
+        if user:
+            if user.username != username:
+                return Response({'error': 'User with this email already exists'}, status=status.HTTP_400_BAD_REQUEST)
         else:
+            serializer = SignUpSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
             user = serializer.save()
+
+        user.confirmation_code = token_gen.make_token(user)
+        user.save()
 
         send_mail(
             'Регистрация в Yamdb',
             f'Код подтверждения {user.confirmation_code}',
-            'from@example.com',
+            settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=False,
         )
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(
+            {'email': user.email, 'username': user.username},
+            status=status.HTTP_200_OK)
 
 
 class JWTokenView(APIView):

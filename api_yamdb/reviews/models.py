@@ -15,19 +15,20 @@ MAX_RATING = 10
 WRONG_RATING = (f'Оценка должна лежать в диапазоне от {MIN_RATING} '
                 f'до {MAX_RATING}!')
 
-USER = 'user'
-MODERATOR = 'moderator'
-ADMIN = 'admin'
-
-ROLES = [
-    (USER, 'пользователь'),
-    (MODERATOR, 'модератор'),
-    (ADMIN, 'администратор'),
-]
-
 
 class User(AbstractUser):
     """Кастомный класс пользователей."""
+
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+
+    ROLES = [
+        (USER, 'пользователь'),
+        (MODERATOR, 'модератор'),
+        (ADMIN, 'администратор'),
+    ]
+    
     username = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,
@@ -61,6 +62,18 @@ class User(AbstractUser):
     )
     confirmation_code = models.CharField(max_length=100, blank=True)
 
+    @property
+    def is_admin(self):
+        return self.role == self.ADMIN or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
+
+    @property
+    def is_user(self):
+        return self.role == self.USER
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
@@ -68,18 +81,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
-
-    @property
-    def is_admin(self):
-        return self.role == 'admin' or self.is_superuser
-
-    @property
-    def is_moderator(self):
-        return self.role == 'moderator'
-
-    @property
-    def is_user(self):
-        return self.role == 'user'
 
 
 class Category(models.Model):
