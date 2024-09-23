@@ -6,6 +6,7 @@ from django.db import models
 
 from .validators import regex_validator, validate_not_me
 
+
 DESCRIPTION_LENGTH_LIMIT = 20
 MAX_CHAR_LENGTH = 250
 MAX_SLUG_LENGTH = 50
@@ -28,7 +29,7 @@ class User(AbstractUser):
         (MODERATOR, 'модератор'),
         (ADMIN, 'администратор'),
     ]
-    
+
     username = models.CharField(
         verbose_name='Имя пользователя',
         max_length=150,
