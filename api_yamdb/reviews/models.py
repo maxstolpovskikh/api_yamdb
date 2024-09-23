@@ -134,7 +134,7 @@ class Title(models.Model):
         max_length=MAX_CHAR_LENGTH,
         verbose_name='Hазвание произведения',
     )
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         verbose_name='год выхода',
         validators=[
             MinValueValidator(
@@ -146,6 +146,7 @@ class Title(models.Model):
                 message='Год не может быть из будущего'
             )
         ],
+        db_index=True
     )
     description = models.TextField(
         verbose_name='описание',
