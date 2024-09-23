@@ -1,10 +1,10 @@
-import random
-
-from django.shortcuts import get_object_or_404
+from django.core.validators import MaxValueValidator, MinValueValidator
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import (Category, Comment, Genre, MAX_RATING, MIN_RATING,
+                            Review, Title, User, WRONG_RATING)
+
 
 REVIEW_COUNT_ERROR = 'Можно оставить только один отзыв на произведение!'
 
@@ -65,6 +65,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для модели жанра с полями имени и slug'а."""
+
     class Meta:
         model = Genre
         fields = ('name', 'slug')
@@ -93,6 +94,7 @@ class GetTitleSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для модели произведения."""
+
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
@@ -120,6 +122,18 @@ class ReviewSerialiser(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
+    score = serializers.IntegerField(
+        validators=[
+            MinValueValidator(
+                limit_value=MIN_RATING,
+                message=WRONG_RATING,
+            ),
+            MaxValueValidator(
+                limit_value=MAX_RATING,
+                message=WRONG_RATING,
+            )
+        ]
+    )
 
     class Meta:
         model = Review
@@ -128,11 +142,9 @@ class ReviewSerialiser(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context['request']
         if request.method == 'POST':
-            title_id = self.context['view'].kwargs['title_id']
-            if Review.objects.filter(
-                title=get_object_or_404(Title, pk=title_id),
-                author=request.user
-            ).exists():
+            if request.user.reviews.filter(
+                title_id=self.context['view'].kwargs['title_id']
+            ):
                 raise ValidationError(REVIEW_COUNT_ERROR)
         return data
 
